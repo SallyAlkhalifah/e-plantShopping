@@ -1,68 +1,61 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { removeItem, updateQuantity } from './CartSlice';
-import './CartItem.css';
+import React from "react";
+import { useDispatch } from "react-redux";
+import { removeItem, updateQuantity } from "./CartSlice";
 
-const CartItem = ({ onContinueShopping }) => {
-  const cart = useSelector(state => state.cart.items);
+const CartItem = ({ item, onContinueShopping }) => {
   const dispatch = useDispatch();
 
-  // Calculate total amount for all products in the cart
-  const calculateTotalAmount = () => {
- 
+  // حساب مجموع تكلفة كل المنتجات في هذا النوع
+  const calculateTotalCost = () => {
+    const price = parseFloat(item.cost.substring(1)); // تحويل $10.00 إلى 10
+    return (price * item.quantity).toFixed(2);
   };
 
-  const handleContinueShopping = (e) => {
-   
+  // زيادة كمية المنتج
+  const handleIncrement = () => {
+    dispatch(updateQuantity({ name: item.name, quantity: item.quantity + 1 }));
   };
 
-
-
-  const handleIncrement = (item) => {
+  // نقصان كمية المنتج
+  const handleDecrement = () => {
+    if (item.quantity > 1) {
+      dispatch(updateQuantity({ name: item.name, quantity: item.quantity - 1 }));
+    } else {
+      dispatch(removeItem(item.name));
+    }
   };
 
-  const handleDecrement = (item) => {
-   
+  // حذف المنتج بالكامل
+  const handleRemove = () => {
+    dispatch(removeItem(item.name));
   };
 
-  const handleRemove = (item) => {
+  // العودة لصفحة المنتجات
+  const handleContinueShopping = () => {
+    if (onContinueShopping) onContinueShopping();
   };
 
-  // Calculate total cost based on quantity for an item
-  const calculateTotalCost = (item) => {
+  // زر الدفع (حالياً مجرد رسالة تنبيه)
+  const handleCheckoutShopping = () => {
+    alert("Functionality to be added for future reference");
   };
 
   return (
-    <div className="cart-container">
-      <h2 style={{ color: 'black' }}>Total Cart Amount: ${calculateTotalAmount()}</h2>
-      <div>
-        {cart.map(item => (
-          <div className="cart-item" key={item.name}>
-            <img className="cart-item-image" src={item.image} alt={item.name} />
-            <div className="cart-item-details">
-              <div className="cart-item-name">{item.name}</div>
-              <div className="cart-item-cost">{item.cost}</div>
-              <div className="cart-item-quantity">
-                <button className="cart-item-button cart-item-button-dec" onClick={() => handleDecrement(item)}>-</button>
-                <span className="cart-item-quantity-value">{item.quantity}</span>
-                <button className="cart-item-button cart-item-button-inc" onClick={() => handleIncrement(item)}>+</button>
-              </div>
-              <div className="cart-item-total">Total: ${calculateTotalCost(item)}</div>
-              <button className="cart-item-delete" onClick={() => handleRemove(item)}>Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div style={{ marginTop: '20px', color: 'black' }} className='total_cart_amount'></div>
-      <div className="continue_shopping_btn">
-        <button className="get-started-button" onClick={(e) => handleContinueShopping(e)}>Continue Shopping</button>
-        <br />
-        <button className="get-started-button1">Checkout</button>
+    <div className="cart-item">
+      <img src={item.image} alt={item.name} className="cart-item-image" />
+      <div className="cart-item-details">
+        <h3>{item.name}</h3>
+        <p>Unit Price: {item.cost}</p>
+        <p>Subtotal: ${calculateTotalCost()}</p>
+        <div className="cart-item-controls">
+          <button onClick={handleDecrement}>-</button>
+          <span>{item.quantity}</span>
+          <button onClick={handleIncrement}>+</button>
+          <button onClick={handleRemove}>Delete</button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default CartItem;
-
-
